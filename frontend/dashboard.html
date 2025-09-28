@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Restaurante - Órdenes</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="card">
+    <h1>Órdenes</h1>
+    <div id="clienteBox"></div>
+    <section>
+      <h2>Nueva orden</h2>
+      <input id="platillo" placeholder="Platillo">
+      <input id="notas" placeholder="Notas (opcional)">
+      <button onclick="crear()">Crear</button>
+    </section>
+    <section>
+      <h2>Mis órdenes</h2>
+      <div id="lista"></div>
+    </section>
+    <p id="msg"></p>
+    <button onclick="salir()">Cerrar sesión</button>
+  </div>
+  <script src="js/api.js"></script>
+  <script>
+    let cliente = JSON.parse(localStorage.getItem('cliente')||'null');
+    if(!cliente){ location.href='index.html'; }
+    document.getElementById('clienteBox').innerText = `Cliente: ${cliente.nombre} (${cliente.email})`;
+
+    async function cargar() {
+      const arr = await api(`/ordenes/cliente/${cliente.id}`,'GET');
+      const cont = document.getElementById('lista');
+      cont.innerHTML = '';
+      arr.forEach(o => {
+        const d = document.createElement('div');
+        d.className='item';
+        d.innerHTML = `<b>#${o.id}</b> ${o.platillo_nombre} — <i>${o.estado}</i> — ${new Date(o.creado).toLocaleString()} ` +
+                      `<button data-id="${o.id}">Avanzar estado</button>`;
+        d.querySelector('button').onclick = () => avanzar(o.id);
+        cont.appendChild(d);
+      });
+    }
+
+    async function crear(){
+      const platillo_nombre = document.getElementById('platillo').value;
+      const notas = document.getElementById('notas').value;
+      const r = await api('/ordenes','POST',{ cliente_id: cliente.id, platillo_nombre, notas });
+      if(r.error) return setMsg(r.error);
+      setMsg('Orden creada');
+      document.getElementById('platillo').value='';
+      document.getElementById('notas').value='';
+      cargar();
+    }
+
+    async function avanzar(id){
+      const r = await api(`/ordenes/${id}/estado`,'PUT');
+      if(r.error) return setMsg(r.error);
+      setMsg(`Orden ${id} → ${r.estado}`);
+      cargar();
+    }
+
+    function setMsg(t){ document.getElementById('msg').innerText=t; }
+    function salir(){ localStorage.removeItem('cliente'); location.href='index.html'; }
+    cargar();
+  </script>
+</body>
+</html>

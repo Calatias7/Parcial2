@@ -1,0 +1,19 @@
+-- restaurante_ordenes_db schema
+CREATE TABLE IF NOT EXISTS clientes (
+  id SERIAL PRIMARY KEY,
+  nombre VARCHAR(100) NOT NULL,
+  email VARCHAR(120) UNIQUE NOT NULL,
+  telefono VARCHAR(40) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS ordenes (
+  id SERIAL PRIMARY KEY,
+  cliente_id INTEGER NOT NULL REFERENCES clientes(id) ON DELETE CASCADE,
+  platillo_nombre VARCHAR(120) NOT NULL,
+  notas TEXT,
+  estado VARCHAR(20) NOT NULL DEFAULT 'pending',
+  creado TIMESTAMP DEFAULT NOW()
+);
+
+-- helpful index
+CREATE INDEX IF NOT EXISTS idx_ordenes_cliente ON ordenes(cliente_id);

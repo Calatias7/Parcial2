@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Restaurante - Login/Registro</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="card">
+    <h1>Restaurante</h1>
+    <section>
+      <h2>Login</h2>
+      <input id="loginEmail" placeholder="Email">
+      <input id="loginTel" placeholder="Teléfono">
+      <button onclick="login()">Entrar</button>
+    </section>
+    <hr>
+    <section>
+      <h2>Registro</h2>
+      <input id="regNombre" placeholder="Nombre">
+      <input id="regEmail" placeholder="Email">
+      <input id="regTel" placeholder="Teléfono">
+      <button onclick="registrar()">Crear cuenta</button>
+    </section>
+    <p id="msg"></p>
+  </div>
+  <script src="js/api.js"></script>
+  <script>
+    async function login() {
+      const email = document.getElementById('loginEmail').value;
+      const telefono = document.getElementById('loginTel').value;
+      const res = await api('/clientes/login','POST',{ email, telefono });
+      if (res.error) return setMsg(res.error);
+      localStorage.setItem('cliente', JSON.stringify(res));
+      location.href = 'dashboard.html';
+    }
+    async function registrar() {
+      const nombre = document.getElementById('regNombre').value;
+      const email = document.getElementById('regEmail').value;
+      const telefono = document.getElementById('regTel').value;
+      const res = await api('/clientes/registrar','POST',{ nombre, email, telefono });
+      if (res.error) return setMsg(res.error);
+      setMsg('Registrado, ahora inicia sesión.');
+    }
+    function setMsg(t) { document.getElementById('msg').innerText = t; }
+  </script>
+</body>
+</html>
